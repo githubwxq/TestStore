@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -87,9 +88,48 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 查找文件文件路径
      */
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void findFile() {
 
 //        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+        Uri extnerl = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+
+        String selection = MediaStore.Downloads.DISPLAY_NAME + "=?";
+
+        String[] args = new String[]{"first_bug.text"};
+        String[] projections = new String[]{MediaStore.Downloads._ID};
+
+
+        Cursor cursor = getContentResolver().query(extnerl, projections, selection, args, null);
+
+        if (cursor.moveToFirst()) {
+            Uri queryUir = ContentUris.withAppendedId(extnerl, cursor.getLong(0));
+            Toast.makeText(MainActivity.this, "查询success" + queryUir, Toast.LENGTH_LONG).show();
+            cursor.close();
+
+            ContentResolver contentResolver = getContentResolver();
+
+            InputStream inputStream= null;
+            try {
+                inputStream = contentResolver.openInputStream(queryUir);
+
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            while((len = inputStream.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+            }
+            bos.close();
+
+                String str= new String (    bos.toByteArray());
+
+                tv_find_file.setText(str);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
 
     }
 
@@ -113,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             os = new FileOutputStream(newFile);
             if (os != null) {
-                os.write("file is created111111111111111111111111".getBytes(StandardCharsets.UTF_8));
+                os.write("我是插入的数据".getBytes(StandardCharsets.UTF_8));
                 os.flush();
             }
 
@@ -191,13 +231,13 @@ public class MainActivity extends AppCompatActivity {
             OutputStream outputStream = contentResolver.openOutputStream(resultUri);
 
             //将字符串转成字节
-            byte[] contentInBytes = "first_bugfirst_bugfafasfaaaaaaaaaaaaaaafirst_bugaaa".toString().getBytes();
+            byte[] contentInBytes = "我是插入文件的内容".toString().getBytes();
 
             outputStream.write(contentInBytes);
             outputStream.flush();
 
             outputStream.close();
-            Toast.makeText(MainActivity.this, "写入陈宫", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "插入成功", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
