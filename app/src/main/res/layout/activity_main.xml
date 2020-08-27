@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:textSize="25sp"
+        android:id="@+id/tv_create_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="创建文件"
+    />
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:textSize="25sp"
+        android:id="@+id/tv_find_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="查询读取文件"
+        />
+
+
+
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:textSize="25sp"
+        android:id="@+id/tv_find_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="查询图片并显示"
+        />
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:textSize="25sp"
+        android:id="@+id/tv_insert_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="插入图片"
+        />
+
+
+
+    <ImageView
+        android:layout_marginTop="15dp"
+        android:id="@+id/iv_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"></ImageView>
+
+
+</LinearLayout>
