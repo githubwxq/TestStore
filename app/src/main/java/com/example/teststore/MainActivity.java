@@ -25,16 +25,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     TextView tv_find_pic;
     TextView tv_insert_pic;
     ImageView iv_pic;
+    TextView tv_load_net_pic;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -55,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         tv_find_pic = findViewById(R.id.tv_find_pic);
         tv_insert_pic = findViewById(R.id.tv_insert_pic);
         iv_pic = findViewById(R.id.iv_pic);
+        tv_load_net_pic = findViewById(R.id.tv_load_net_pic);
 
         checkPermission(this);
 
@@ -83,6 +91,18 @@ public class MainActivity extends AppCompatActivity {
                 searchImage();
             }
         });
+
+        tv_load_net_pic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 加载网络图片
+
+//                downLoadImage("https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2588111137,2818876915&fm=26&gp=0.jpg", "wxq.png");
+                downLoadImage("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1598593655729&di=b8332e4d87b63803697de5490e9eea18&imgtype=0&src=http%3A%2F%2Fa2.att.hudong.com%2F36%2F48%2F19300001357258133412489354717.jpg", "1115465465.png");
+
+            }
+        });
+
     }
 
     /**
@@ -109,19 +129,19 @@ public class MainActivity extends AppCompatActivity {
 
             ContentResolver contentResolver = getContentResolver();
 
-            InputStream inputStream= null;
+            InputStream inputStream = null;
             try {
                 inputStream = contentResolver.openInputStream(queryUir);
 
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            while((len = inputStream.read(buffer)) != -1) {
-                bos.write(buffer, 0, len);
-            }
-            bos.close();
+                byte[] buffer = new byte[1024];
+                int len = 0;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                while ((len = inputStream.read(buffer)) != -1) {
+                    bos.write(buffer, 0, len);
+                }
+                bos.close();
 
-                String str= new String (    bos.toByteArray());
+                String str = new String(bos.toByteArray());
 
                 tv_find_file.setText(str);
 
@@ -134,17 +154,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
-
-
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void insertOwnerFile() {
 
-//在自身目录下创建apk文件夹
+        //在自身目录下创建apk文件夹
         File apkFile = getExternalFilesDir("apk");
 
         String apkFilePath = getExternalFilesDir("apk").getAbsolutePath();
@@ -191,16 +204,15 @@ public class MainActivity extends AppCompatActivity {
             cursor.close();
             // 给图片设置bitmap
             try {
-                    ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(queryUir, "r");
-                    if (fd != null) {
-                        Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
-                        fd.close();
-                        iv_pic.setImageBitmap(bitmap);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(queryUir, "r");
+                if (fd != null) {
+                    Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
+                    fd.close();
+                    iv_pic.setImageBitmap(bitmap);
                 }
-
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
         }
@@ -208,14 +220,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void insertFile() {
         ContentResolver contentResolver = getContentResolver();
-        Uri uri = MediaStore.Files.getContentUri("external");
-
+//      Uri uri = MediaStore.Files.getContentUri("external");
+        Uri uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
         ContentValues values = new ContentValues();
         String path = Environment.DIRECTORY_DOWNLOADS + "/bug";
         values.put(MediaStore.Downloads.RELATIVE_PATH, path);
-
         values.put(MediaStore.Downloads.DISPLAY_NAME, "first_bug.text");
         values.put(MediaStore.Downloads.TITLE, path);
         Uri resultUri = contentResolver.insert(uri, values);
@@ -225,36 +237,27 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(MainActivity.this, "创建失败", Toast.LENGTH_LONG).show();
         }
-
-
         try {
             OutputStream outputStream = contentResolver.openOutputStream(resultUri);
-
             //将字符串转成字节
             byte[] contentInBytes = "我是插入文件的内容".toString().getBytes();
-
             outputStream.write(contentInBytes);
             outputStream.flush();
-
             outputStream.close();
             Toast.makeText(MainActivity.this, "插入成功", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-        File file = new File(path);
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                Toast.makeText(MainActivity.this, "写入陈宫", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(MainActivity.this, "写入陈宫", Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(MainActivity.this, "写入陈宫", Toast.LENGTH_LONG).show();
-        }
-
-
+//        File file = new File(path);
+//        if (file.exists()) {
+//            if (file.isDirectory()) {
+//                Toast.makeText(MainActivity.this, "写入陈宫", Toast.LENGTH_LONG).show();
+//            } else {
+//                Toast.makeText(MainActivity.this, "写入陈宫", Toast.LENGTH_LONG).show();
+//            }
+//        } else {
+//            Toast.makeText(MainActivity.this, "写入成功", Toast.LENGTH_LONG).show();
+//        }
     }
 
     private void insertImage() {
@@ -275,9 +278,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
 
@@ -319,6 +320,123 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "创建失败", Toast.LENGTH_LONG).show();
         }
-
     }
+
+
+    private static void saveFile(Context context, Uri insertUri) {
+        if (insertUri == null) {
+            return;
+        }
+        String mFilePath = insertUri.toString();
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            os = context.getContentResolver().openOutputStream(insertUri);
+            if (os == null) {
+                return;
+            }
+            int read;
+            File sourceFile = new File("");
+            if (sourceFile.exists()) { // 文件存在时
+                is = new FileInputStream(sourceFile); // 读入原文件
+                byte[] buffer = new byte[1024];
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+                if (os != null) {
+                    os.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    // 下载图片到picture 目录
+
+
+    public void downLoadImage(final String fileUrl, final String fileName) {
+
+        new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.Q)
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                URL url = null;
+                try {
+                    url = new URL(fileUrl);
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                    InputStream inputStream = httpURLConnection.getInputStream();
+                    BufferedInputStream bis = new BufferedInputStream(inputStream);
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+                    values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                    final Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                    if (uri != null) {
+                        OutputStream outputStream = getContentResolver().openOutputStream(uri);
+                        if (outputStream != null) {
+                            BufferedOutputStream bos = new BufferedOutputStream(outputStream);
+                            if (copyFileWithStream(bos, inputStream)) { //成功下载图片
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(uri, "r");
+                                            if (fd != null) {
+                                                Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
+                                                fd.close();
+                                                iv_pic.setImageBitmap(bitmap);
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    bis.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private static boolean copyFileWithStream(OutputStream os, InputStream is) {
+        if (os == null || is == null) {
+            return false;
+        }
+        int read = 0;
+        while (true) {
+            try {
+                byte[] buffer = new byte[1444];
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                    os.flush();
+                }
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+                try {
+                    os.close();
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }
