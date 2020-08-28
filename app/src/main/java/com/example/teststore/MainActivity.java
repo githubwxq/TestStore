@@ -187,17 +187,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void searchImage() {
-
         Uri extnerl = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
         String selection = MediaStore.Images.Media.DISPLAY_NAME + "=?";
-
         String[] args = new String[]{"111.jpg"};
         String[] projections = new String[]{MediaStore.Images.Media._ID};
-
-
         Cursor cursor = getContentResolver().query(extnerl, projections, selection, args, null);
-
         if (cursor.moveToFirst()) {
             Uri queryUir = ContentUris.withAppendedId(extnerl, cursor.getLong(0));
             Toast.makeText(MainActivity.this, "查询success" + queryUir, Toast.LENGTH_LONG).show();
