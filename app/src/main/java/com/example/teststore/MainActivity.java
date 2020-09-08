@@ -69,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
         tv_create_file.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                insertFile();
+//                insertFile();
+                insertOwnerFile();
             }
         });
 
@@ -98,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
                 // 加载网络图片
 
 //                downLoadImage("https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2588111137,2818876915&fm=26&gp=0.jpg", "wxq.png");
-                downLoadImage("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1598593655729&di=b8332e4d87b63803697de5490e9eea18&imgtype=0&src=http%3A%2F%2Fa2.att.hudong.com%2F36%2F48%2F19300001357258133412489354717.jpg", "1115465465.png");
+//                downLoadImage("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1598593655729&di=b8332e4d87b63803697de5490e9eea18&imgtype=0&src=http%3A%2F%2Fa2.att.hudong.com%2F36%2F48%2F19300001357258133412489354717.jpg", "1115465465.png");
+                downLoadImage("https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1029060929,783397478&fm=26&gp=0.jpg", "11ddddddd15465465.png");
 
             }
         });
@@ -189,8 +191,21 @@ public class MainActivity extends AppCompatActivity {
     private void searchImage() {
         Uri extnerl = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String selection = MediaStore.Images.Media.DISPLAY_NAME + "=?";
-        String[] args = new String[]{"111.jpg"};
-        String[] projections = new String[]{MediaStore.Images.Media._ID};
+        String[] args = new String[]{"5555555555555.jpg"};
+//        String[] projections = new String[]{MediaStore.Images.Media._ID};
+      String[] projections = {
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.DATE_ADDED,
+                MediaStore.Images.Media.WIDTH,
+                MediaStore.Images.Media.HEIGHT,
+                MediaStore.Images.Media.MIME_TYPE,
+                MediaStore.Images.Media.SIZE,
+        };
+
+
+
         Cursor cursor = getContentResolver().query(extnerl, projections, selection, args, null);
         if (cursor.moveToFirst()) {
             Uri queryUir = ContentUris.withAppendedId(extnerl, cursor.getLong(0));
@@ -255,12 +270,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertImage() {
-        String disPlayName = "111.jpg";
+        String disPlayName = "5555555555555.jpg";
         ContentResolver contentResolver1 = getContentResolver();
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, disPlayName);
         contentValues.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/jpeg");
-        contentValues.put(MediaStore.Images.ImageColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/wxq/");
+        contentValues.put(MediaStore.Images.ImageColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/wxq/");
         Uri insert = contentResolver1.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
         if (insert != null) {
             Bitmap bitmap = getBitmap(this, R.mipmap.ic_launcher);
@@ -405,6 +420,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+
+
+
 
     private static boolean copyFileWithStream(OutputStream os, InputStream is) {
         if (os == null || is == null) {
